@@ -39,7 +39,7 @@ def download_section(url: str, start_sec: float, end_sec: float, out_path: Path)
     cmd = [
         sys.executable, "-m", "yt_dlp",
         "--download-sections", sec_arg,
-        "-f", "bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        "-f", "137+140/bestvideo[vcodec^=avc1]+bestaudio/best",
         "--force-overwrites",
         "-o", str(out_path),
         url
