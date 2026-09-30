@@ -1,0 +1,53 @@
+# Python virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large media files and caches
+inputs/
+output/
+models/*.tflite
+tests/sample_input.mp4
+tests/sample_output_short.mp4
+tests/sample_sub.ass
+*.part
+*.ytdl
+*.mp4
+*.wav
+*.mp3
+*.m4a
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment and secrets
+.env
+.env.local
+*.token
+credentials.json
+
+# IDE and OS files
+.vscode/
+.idea/
+Thumbs.db
+[Dd]esktop.ini

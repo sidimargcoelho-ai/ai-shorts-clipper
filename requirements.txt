@@ -1,0 +1,7 @@
+yt-dlp
+faster-whisper
+opencv-python
+mediapipe
+pyyaml
+tqdm
+gradio

@@ -1,0 +1,41 @@
+# ==============================================================================
+# Configuração do Pipeline de Vídeos e Cortes (Shorts / Reels / TikTok)
+# ==============================================================================
+
+whisper:
+  model_size: "small"        # tiny, base, small, medium, large-v3
+  device: "cuda"             # "cuda" para GPU (GTX 1650) ou "cpu"
+  compute_type: "float16"    # "float16" para GPU ou "int8"
+  language: "pt"             # "pt" para Português ou "" para auto-detecção
+
+clipping:
+  min_duration: 30           # Duração mínima em segundos
+  max_duration: 65           # Duração máxima em segundos
+  target_duration: 45        # Duração ideal
+
+subtitles:
+  font_name: "Arial Black"   # Fonte de alta visibilidade para TikTok
+  font_size: 26
+  bold: 1
+  italic: 0
+  primary_color: "&H00FFFFFF"     # Branco BGR: &H00BBGGRR
+  highlight_color: "&H0000FFFF"   # Amarelo destaque (&H0000FFFF) ou Verde (&H0000FF55)
+  outline_color: "&H00000000"     # Borda preta forte
+  shadow_color: "&H80000000"      # Sombra suave
+  outline_width: 3.5
+  shadow: 2.0
+  words_per_subtitle: 3           # 2 a 4 palavras para retenção máxima
+  margin_v: 240                   # Altura da legenda (acima da interface do TikTok)
+
+cropping:
+  mode: "face_tracking"      # "face_tracking", "split_screen", "center"
+  target_width: 1080
+  target_height: 1920
+  smoothing: 0.85            # 0.0 a 0.95 (amortecimento para câmera estável)
+
+renderer:
+  codec: "h264_nvenc"        # Aceleração de hardware na NVIDIA GTX 1650
+  fallback_codec: "libx264"  # Fallback caso NVENC não responda
+  preset: "p4"               # NVENC preset p1..p7 (p4 = balanced)
+  video_bitrate: "6000k"
+  audio_bitrate: "192k"
