@@ -18,9 +18,9 @@ class HighlightDetector:
         self.max_duration = max_duration
         self.target_duration = target_duration
 
-    def detect_highlights(self, transcript_data: Dict[str, Any], max_clips: int = 5) -> List[Dict[str, Any]]:
+    def detect_highlights(self, transcript_data: Dict[str, Any], max_clips: int = 15) -> List[Dict[str, Any]]:
         """
-        Analisa os segmentos e gera os melhores candidatos a cortes.
+        Analisa os segmentos e gera os melhores candidatos a cortes (garantindo pelo menos max_clips quando o vídeo permitir).
         """
         segments = transcript_data.get("segments", [])
         if not segments:
@@ -61,14 +61,13 @@ class HighlightDetector:
         # Filtrar sobreposições excessivas (garantir variedade)
         selected_clips: List[Dict[str, Any]] = []
         for cand in candidates:
-            # Verifica se sobrepõe significativamente com algum já selecionado
             overlaps = False
             for sel in selected_clips:
                 overlap_start = max(cand["start"], sel["start"])
                 overlap_end = min(cand["end"], sel["end"])
                 if overlap_end > overlap_start:
                     overlap_duration = overlap_end - overlap_start
-                    if overlap_duration > 10.0:  # Mais de 10s de sobreposição
+                    if overlap_duration > 8.0:  # Limite de sobreposição
                         overlaps = True
                         break
             if not overlaps:
@@ -76,6 +75,28 @@ class HighlightDetector:
                 if len(selected_clips) >= max_clips:
                     break
 
+        # Se não atingiu max_clips, busca cobrir a linha do tempo (timeline distribution)
+        if len(selected_clips) < max_clips and candidates:
+            for cand in candidates:
+                if any(cand["start"] == sel["start"] and cand["end"] == sel["end"] for sel in selected_clips):
+                    continue
+                # Permite sobreposição menor se ainda faltar clips
+                overlaps = False
+                for sel in selected_clips:
+                    overlap_start = max(cand["start"], sel["start"])
+                    overlap_end = min(cand["end"], sel["end"])
+                    if overlap_end > overlap_start:
+                        overlap_duration = overlap_end - overlap_start
+                        if overlap_duration > 15.0:
+                            overlaps = True
+                            break
+                if not overlaps:
+                    selected_clips.append(cand)
+                    if len(selected_clips) >= max_clips:
+                        break
+
+        # Ordenar cronologicamente para facilitar navegação
+        selected_clips.sort(key=lambda x: x["start"])
         return selected_clips
 
     def _calculate_viral_score(self, hook_text: str, full_text: str, duration: float) -> float:

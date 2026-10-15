@@ -15,6 +15,7 @@ from src.highlighter import HighlightDetector
 from src.tracker import FaceTracker
 from src.subtitle import SubtitleGenerator
 from src.renderer import VideoRenderer
+from src.description_generator import DescriptionGenerator
 
 def load_config(config_path: str = "config.yaml") -> dict:
     with open(config_path, "r", encoding="utf-8") as f:
@@ -23,7 +24,7 @@ def load_config(config_path: str = "config.yaml") -> dict:
 def run_pipeline(
     url: str = None,
     input_file: str = None,
-    num_clips: int = 3,
+    num_clips: int = 15,
     start_time: float = None,
     end_time: float = None,
     crop_mode: str = None,
@@ -99,6 +100,7 @@ def run_pipeline(
     )
     subtitle_gen = SubtitleGenerator(config)
     renderer = VideoRenderer(config)
+    desc_gen = DescriptionGenerator(config)
 
     output_dir = Path("output")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -144,22 +146,35 @@ def run_pipeline(
         )
         generated_files.append(final_clip)
 
+        # D. Geração da Descrição Pronta para TikTok (.txt com o mesmo nome do .mp4)
+        if desc_gen.enabled:
+            print("  📝 Gerando descrição para TikTok...")
+            desc_text = desc_gen.generate(
+                clip_text=clip.get("text", ""),
+                clip_title=clip.get("title", ""),
+                context_desc=clip.get("description", "")
+            )
+            txt_path = out_path.with_suffix(".txt")
+            desc_gen.save_description(desc_text, txt_path)
+            print(f"  ✅ Descrição salva com sucesso: {txt_path.name}")
+
     print("\n" + "=" * 60)
-    print(f"🎉 SUCESSO! {len(generated_files)} Shorts foram gerados e prontos para postar:")
+    print(f"🎉 SUCESSO! {len(generated_files)} Shorts e Descrições gerados:")
     for f in generated_files:
-        print(f"  👉 {f.resolve()}")
+        print(f"  👉 Vídeo: {f.name} | Descrição: {f.with_suffix('.txt').name}")
     print("=" * 60)
 
 def main():
     parser = argparse.ArgumentParser(description="Pipeline de Cortes Automáticos para Shorts/TikTok")
     parser.add_argument("--url", type=str, help="URL do vídeo (YouTube, Twitch, etc.)")
     parser.add_argument("--input", type=str, help="Caminho para arquivo de vídeo local")
-    parser.add_argument("--clips", type=int, default=3, help="Quantidade de cortes a gerar (padrão: 3)")
+    parser.add_argument("--clips", type=int, default=15, help="Quantidade de cortes a gerar (padrão: 15)")
     parser.add_argument("--start", type=float, default=None, help="Início manual do corte em segundos")
     parser.add_argument("--end", type=float, default=None, help="Fim manual do corte em segundos")
     parser.add_argument("--mode", type=str, choices=["face_tracking", "split_screen", "center"], default=None, help="Modo de enquadramento 9:16")
     parser.add_argument("--model", type=str, default=None, help="Modelo do Whisper (tiny, base, small, medium)")
     parser.add_argument("--no-subtitles", action="store_true", help="Desativa a queima de legendas")
+    parser.add_argument("--no-descriptions", action="store_true", help="Desativa a geração de arquivos .txt com descrição")
     parser.add_argument("--list-only", action="store_true", help="Apenas transcreve e lista os momentos virais")
 
     args = parser.parse_args()

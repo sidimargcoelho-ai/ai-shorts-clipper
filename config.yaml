@@ -9,9 +9,18 @@ whisper:
   language: "pt"             # "pt" para Português ou "" para auto-detecção
 
 clipping:
+  min_clips: 15              # Mínimo de cortes por vídeo longo (requisito padrão)
   min_duration: 30           # Duração mínima em segundos
   max_duration: 65           # Duração máxima em segundos
   target_duration: 45        # Duração ideal
+
+descriptions:
+  enabled: true              # Gerar arquivo .txt com a descrição pronta para TikTok
+  provider: "auto"           # "gemini", "groq", "openai", "local", ou "auto"
+  gemini_api_key: ""         # Opcional: chave gratuita Google AI Studio
+  groq_api_key: ""           # Opcional: chave Groq
+  openai_api_key: ""         # Opcional: chave OpenAI
+  model: "gemini-1.5-flash"   # Modelo de LLM quando usar API
 
 subtitles:
   font_name: "Arial Black"   # Fonte de alta visibilidade para TikTok
