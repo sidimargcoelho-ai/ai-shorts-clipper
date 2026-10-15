@@ -137,8 +137,34 @@ def generate_podpeople_descriptions():
         generated_count += 1
 
     print("=" * 60)
-    print(f"🎉 TODAS AS {generated_count} DESCRIÇÕES FORAM GERADAS COM SUCESSO!")
+    print(f"🎉 TODAS AS {generated_count} DESCRIÇÕES DE PODPEOPLE FORAM GERADAS COM SUCESSO!")
     print("=" * 60)
+
+def generate_cuts_descriptions(cuts_file: Path, prefix: str):
+    if not cuts_file.exists():
+        return
+    with open(cuts_file, "r", encoding="utf-8") as f:
+        clips = json.load(f)
+
+    desc_gen = DescriptionGenerator()
+    output_dir = Path("output")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"\n📝 Processando descrições para {prefix} ({len(clips)} cortes)...")
+    for clip in clips:
+        title = clip["title"]
+        txt_name = f"Short_{prefix}_{title}.txt"
+        txt_path = output_dir / txt_name
+        if not txt_path.exists():
+            content = desc_gen.generate(
+                clip_text=clip.get("text", ""),
+                clip_title=title,
+                context_desc=clip.get("description", "")
+            )
+            desc_gen.save_description(content, txt_path)
+            print(f"  ✅ [TXT Gerado] {txt_name}")
 
 if __name__ == "__main__":
     generate_podpeople_descriptions()
+    generate_cuts_descriptions(Path("inputs/cury_curated_cuts.json"), "Cury")
+    generate_cuts_descriptions(Path("inputs/alex_curated_cuts.json"), "Alex")
